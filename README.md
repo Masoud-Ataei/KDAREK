@@ -1,6 +1,6 @@
 # Kurkova - Distance-Aware Errors for Kolmogorov Networks
 
-This is the github repo for the paper ["K-DAREK: Distance-Aware Errors for Kolmogorov Networks"](https://). You may want to quickstart with [example](https://github.com/Masoud-Ataei/KDAREK/example.ipynb).
+This is the github repo for the paper ["K-DAREK: Distance-Aware Errors for Kolmogorov Networks"](https://). You may want to quickstart with [example](https://github.com/Masoud-Ataei/KDAREK/blob/main/KDAREK_Example.ipynb).
 
 KDAREK is a method to compute **tight**, **distance-aware**, and **worst-case error bounds** for Kurkova - Kolmogorov-Arnold Networks (KKANs). Unlike probabilistic uncertainty estimation, KDAREK uses Lipschitz continuity of true functions to derive analytical bounds that increase with distance from training data. Please find the paper and other information here [here](https://Masoud-Ataei.github.io/KDAREK/index.html).
 | ![Multi agent simulation when GP model fails.](imgs/overlayed_gifsanim_GP2.gif) | ![Multi agent simulation when DAREK model reach goal.](imgs/overlayed_gifsanim_DAREK2.gif) |
