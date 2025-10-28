@@ -13,7 +13,7 @@ License-File: LICENSE
 
 # K-DAREK - Distance Aware Error for Kurkova Kolmogorov networks
 
-This is the github repo for the paper ["K-DAREK - Distance Aware Error for Kurkova Kolmogorov networks"](https://github.com/Masoud-Ataei/KDAREK/blob/main/imgs/2025_Ataei_KDAREK.pdf). You may want to quickstart with [tutrial](https://github.com/Masoud-Ataei/KDAREK/blob/main/KDAREK_Example.ipynb).
+This is the github repo for the paper ["K-DAREK - Distance Aware Error for Kurkova Kolmogorov networks"](https://arxiv.org/abs/2510.22021). You may want to quickstart with [tutrial](https://github.com/Masoud-Ataei/KDAREK/blob/main/KDAREK_Example.ipynb).
 
 KDAREK is a method to compute **tight**, **distance-aware**, **worst-case error bounds** for Kurkova Kolmogorov-Arnold Networks (KKANs). Unlike probabilistic uncertainty estimation, KDAREK uses Lipschitz continuity of true functions to derive analytical bounds that increase with distance from training data. Please find the paper and other information [here](https://Masoud-Ataei.github.io/KDAREK/index.html).
 
