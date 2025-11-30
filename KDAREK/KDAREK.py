@@ -8,6 +8,23 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from kan.LBFGS import *
 
+# from sympy import *
+# import sympy
+# from kan import KANLayer
+# import torch
+# from kan.spline import *
+# from kan.utils import sparse_mask
+# import numpy as np
+# from  scipy.interpolate import splrep, splev
+# from sklearn.cluster import KMeans
+# from scipy.spatial import cKDTree
+# from scipy.stats import qmc
+# import math
+# from kan import MultKAN
+# from kan.Symbolic_KANLayer import Symbolic_KANLayer
+# from kan.utils import SYMBOLIC_LIB
+# import random
+
 class LipschitzLinear(nn.Module):
     def __init__(self, in_features, out_features, lipschitz_const = 1.0):
         super().__init__()
@@ -26,7 +43,8 @@ class KDAREK(torch.nn.Module):
                  kan_base_fun = 'identity', 
                  kan_seed=42, 
                  device='cpu', 
-                 L_l = 1.0, symbolic_enabled = False, auto_save = False):
+                 L_l = 1.0, symbolic_enabled = False, auto_save = False,
+                 kan_extend = False):
         super(KDAREK, self).__init__()
         self.width_mlp            = mlp_width[:]
         self.width_kan            = kan_width[:]                
@@ -38,6 +56,7 @@ class KDAREK(torch.nn.Module):
         self.L_l                  = L_l        
         self.kan_symbolic_enabled = symbolic_enabled
         self.kan_auto_save        = auto_save
+        self.kan_extend           = kan_extend   
 
         
         L = len(mlp_width) -1
@@ -66,11 +85,11 @@ class KDAREK(torch.nn.Module):
         self.MLPs = mlps
         if kan_width is not None:
             self.SNNs = DAREK(width=kan_width, grid=kan_grid, k=kan_k, base_fun = kan_base_fun, seed=kan_seed, device='cpu',
-                                 symbolic_enabled = symbolic_enabled, auto_save = auto_save)
+                                 symbolic_enabled = symbolic_enabled, auto_save = auto_save, extend=self.kan_extend)
         else:
             self.SNNs = nn.Identity()
 
-    def predict(self, x0, L_mlp = 1.0, L_k = 1.0, L_1 = 1.0, share = None, noise = 0.0):
+    def predict(self, x0, L_mlp = 1.0, L_k = 1.0, L_1 = 1.0, share = None, noise = 0.0, oint = None, oknot = None):
         y0   = self.forward_mlps(x0)
         mlpw = np.array(self.width_mlp)
         kanw = np.array(self.width_kan)
@@ -87,12 +106,14 @@ class KDAREK(torch.nn.Module):
         # L_kdarek = (L_1 ** len(kanw[:-1])) * kanprod
         L_kdarek = L_k
         
-        y1, err_sp = self.SNNs.predict(y0, fk = L_kdarek, f1= L_1darek, share  = share, noise = noise)
+        y1, err_sp = self.SNNs.predict(y0, fk = L_kdarek, f1= L_1darek, share  = share, noise = noise, oint = oint, oknot = oknot)
         xi0 = self.SNNs.samples['xi'][None,...]
         xt0 = x0[:, None, :]
         ### Error for one mlp per dimension
         err_mlp2 = ((xi0 - xt0).abs().min(axis=1)[0] * L_mlp2).sum(axis = -1).unsqueeze(1).repeat(1,err_sp.shape[1])
-        
+        # a = (g.max() - g.min())/ 6
+        # err_mlp2 = torch.tanh(err_mlp2/ a) * L_mlp
+
 
         # L_mlp = torch.tensor(L_mlp, dtype=torch.float32)
         ### Error for one mlp
@@ -129,11 +150,11 @@ class KDAREK(torch.nn.Module):
         """
 
         
-        snn = self.SNNs
-        if lamb > 0. and not snn.save_act:
-            print('setting lamb=0. If you want to set lamb > 0, set snn.save_act=True')
+        kan = self.SNNs
+        if lamb > 0. and not kan.save_act:
+            print('setting lamb=0. If you want to set lamb > 0, set kan.save_act=True')
             
-        old_save_act, old_symbolic_enabled = snn.disable_symbolic_in_fit(lamb)
+        old_save_act, old_symbolic_enabled = kan.disable_symbolic_in_fit(lamb)
 
         if verbose:
             pbar = tqdm(range(steps), desc='description', ncols=100)
@@ -184,12 +205,12 @@ class KDAREK(torch.nn.Module):
             optimizer.zero_grad()
             pred = self.forward(dataset['train_input'][train_id], singularity_avoiding=singularity_avoiding, y_th=y_th)
             train_loss = loss_fn(pred, dataset['train_label'][train_id])
-            if snn.save_act:
+            if kan.save_act:
                 if reg_metric == 'edge_backward':
-                    snn.attribute()
+                    kan.attribute()
                 if reg_metric == 'node_backward':
-                    snn.node_attribute()
-                reg_ = snn.get_reg(reg_metric, lamb_l1, lamb_entropy, lamb_coef, lamb_coefdiff)
+                    kan.node_attribute()
+                reg_ = kan.get_reg(reg_metric, lamb_l1, lamb_entropy, lamb_coef, lamb_coefdiff)
             else:
                 reg_ = torch.tensor(0.)
             objective = train_loss + lamb * reg_
@@ -201,27 +222,27 @@ class KDAREK(torch.nn.Module):
                 os.makedirs(img_folder)
         if nonfixknot:
             y = self.forward_mlps(dataset['train_input']).detach()
-            snn.forward_update_grid(y,dataset['train_label'],reindex = reindex, seed = seed_knots,
+            kan.forward_update_grid(y,dataset['train_label'],reindex = reindex, seed = seed_knots,
                                      method=rand_method, index=custom_index)
-            if reindex or not 'xi' in snn.samples:                
-                snn.samples['xi'] = dataset['train_input'][snn.samples['indx']]
-            self.knots = snn.knots
-            self.samples = snn.samples
+            if reindex or not 'xi' in kan.samples:                
+                kan.samples['xi'] = dataset['train_input'][kan.samples['indx']]
+            self.knots = kan.knots
+            self.samples = kan.samples
 
         for _ in pbar:
             self.train()
             if _ == steps-1 and old_save_act:
-                snn.save_act = True
+                kan.save_act = True
                 
             if save_fig and _ % save_fig_freq == 0:
-                save_act = snn.save_act
-                snn.save_act = True
+                save_act = kan.save_act
+                kan.save_act = True
             
             train_id = np.random.choice(dataset['train_input'].shape[0], batch_size, replace=False)
             test_id = np.random.choice(dataset['test_input'].shape[0], batch_size_test, replace=False)
 
             if _ % grid_update_freq == 0 and _ < stop_grid_update_step and update_grid and _ >= start_grid_update_step:
-                snn.update_grid(dataset['train_input'][train_id])
+                kan.update_grid(dataset['train_input'][train_id])
 
             if opt == "LBFGS":
                 optimizer.step(closure)
@@ -229,12 +250,12 @@ class KDAREK(torch.nn.Module):
             if opt == "Adam":
                 pred = self.forward(dataset['train_input'][train_id], singularity_avoiding=singularity_avoiding, y_th=y_th)
                 train_loss = loss_fn(pred, dataset['train_label'][train_id])
-                if snn.save_act:
+                if kan.save_act:
                     if reg_metric == 'edge_backward':
-                        snn.attribute()
+                        kan.attribute()
                     if reg_metric == 'node_backward':
-                        snn.node_attribute()
-                    reg_ = snn.get_reg(reg_metric, lamb_l1, lamb_entropy, lamb_coef, lamb_coefdiff)
+                        kan.node_attribute()
+                    reg_ = kan.get_reg(reg_metric, lamb_l1, lamb_entropy, lamb_coef, lamb_coefdiff)
                 else:
                     reg_ = torch.tensor(0.)
                 loss = train_loss + lamb * reg_
@@ -275,26 +296,26 @@ class KDAREK(torch.nn.Module):
                         
                 
                 if save_fig and _ % save_fig_freq == 0:
-                    snn.plot(folder=img_folder, in_vars=in_vars, out_vars=out_vars, title="Step {}".format(_), beta=beta)
+                    kan.plot(folder=img_folder, in_vars=in_vars, out_vars=out_vars, title="Step {}".format(_), beta=beta)
                     plt.savefig(img_folder + '/' + str(_) + '.jpg', bbox_inches='tight', dpi=200)
                     plt.close()
-                    snn.save_act = save_act
+                    kan.save_act = save_act
 				
             if nonfixknot:
                 self.eval()
-                gx = snn.samples['xi']
+                gx = kan.samples['xi']
                 gy = self.forward_mlps(gx).detach()
-                snn.knots['x']   = gy.clone()
-                snn.samples['x'] = gy.clone()
+                kan.knots['x']   = gy.clone()
+                kan.samples['x'] = gy.clone()
                 # gy = selff.den_model(gx)                                
                 y = self.forward_mlps(dataset['train_input'])
-                snn.forward_update_grid(y,dataset['train_label'],seed = seed_knots,
+                kan.forward_update_grid(y,dataset['train_label'],seed = seed_knots,
                                          method=rand_method)
 
         if logsave:
-            snn.log_history('fit', verbose)
+            kan.log_history('fit', verbose)
         # revert back to original state
-        snn.symbolic_enabled = old_symbolic_enabled
+        kan.symbolic_enabled = old_symbolic_enabled
         return results
 
     def saveckpt(self, path='model'):
@@ -310,7 +331,8 @@ class KDAREK(torch.nn.Module):
             device            = model.device,
             L_l               = model.L_l,
             symbolic_enabled  = model.kan_symbolic_enabled,
-            auto_save         = model.kan_auto_save            
+            auto_save         = model.kan_auto_save,
+            kan_extend        = model.kan_extend
 
         )
         model.SNNs.saveckpt(path + '_snn')
@@ -333,7 +355,8 @@ class KDAREK(torch.nn.Module):
                     device           = config['device'],
                     L_l              = config['L_l'],
                     symbolic_enabled = config['symbolic_enabled'],
-                    auto_save        = config['auto_save']
+                    auto_save        = config['auto_save'],
+                    kan_extend       = config['kan_extend']
                     )
         
         model.MLPs = state_mlp
