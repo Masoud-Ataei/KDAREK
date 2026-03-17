@@ -83,11 +83,12 @@ Many intuition about MLPs and other networks may not directy transfer to KANs. S
 
 ## Citation
 ```python
-@article{ataei2025k,
-  title={K-DAREK: Distance Aware Error for Kurkova Kolmogorov Networks},
-  author={Ataei, Masoud and Dhiman, Vikas and Khojasteh, Mohammad Javad},
-  journal={arXiv preprint arXiv:2510.22021},
-  year={2025}
+@inproceedings{ataei2025kdarek,
+    author = {Ataei, M. and Dhiman, V. and Khojasteh, M. J. },
+    title = {{K-DAREK}: Distance Aware Error for Kurkova Kolmogorov Networks},
+    booktitle={Asilomar Conference on Signals, Systems and Computers},
+    year = {2025},
+    organization={IEEE},
 }
 ```
 
