@@ -83,13 +83,14 @@ Many intuition about MLPs and other networks may not directy transfer to KANs. S
 
 ## Citation
 ```python
-@inproceedings{ataei2025kdarek,
-    author = {Ataei, M. and Dhiman, V. and Khojasteh, M. J. },
-    title = {{K-DAREK}: Distance Aware Error for Kurkova Kolmogorov Networks},
-    booktitle={Asilomar Conference on Signals, Systems and Computers},
-    year = {2025},
-    organization={IEEE},
-}
+@INPROCEEDINGS{11443822,
+  author={Ataei, Masoud and Dhiman, Vikas and Khojasteh, Mohammad Javad},
+  booktitle={2025 59th Asilomar Conference on Signals, Systems, and Computers}, 
+  title={K-DAREK: Distance Aware Error for Kurkova Kolmogorov Networks}, 
+  year={2025},
+  pages={1336-1342},
+  keywords={Training;Uncertainty;Computational modeling;Neural networks;Training data;Computer architecture;Systems modeling;Reliability theory;Computational efficiency;Splines (mathematics);Error bounds;neural networks;worst-case analysis;KKAN},
+  doi={10.1109/IEEECONF67917.2025.11443822}}
 ```
 
 ## Contact
