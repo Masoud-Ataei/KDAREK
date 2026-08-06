@@ -1,0 +1,16 @@
+# Core dependencies for the kdarek package and notebooks/01, 02, 04.
+torch>=1.12
+numpy
+scipy
+scikit-learn
+matplotlib
+sympy
+pyyaml
+tqdm
+pykan          # provides the `kan` module DAREK/KAND build on
+GPy            # only needed to import kdarek.kkan (defines a GP baseline class)
+pandas         # ablation / knot-selection result tables
+json_tricks    # numpy-aware JSON I/O used in a couple of notebook cells
+
+# notebooks/03 (CROWN bounds) only -- not needed for 01/02/04.
+# auto-LiRPA==0.3
