@@ -3,6 +3,13 @@
 This is the GitHub repository for the paper [“K-DAREK: Distance-Aware Errors for Kolmogorov Networks”](https://ieeexplore.ieee.org/document/11443822). To get started, see the [example notebook](https://github.com/Masoud-Ataei/KDAREK/blob/main/KDAREK_Example.ipynb).
 
 KDAREK is a method to compute **tight**, **distance-aware**, and **worst-case error bounds** for Kurkova - Kolmogorov-Arnold Networks (KKANs). Unlike probabilistic uncertainty estimation, KDAREK uses Lipschitz continuity of true functions to derive analytical bounds that increase with distance from training data. Please find the paper and other information here [here](https://Masoud-Ataei.github.io/KDAREK/index.html).
+
+![K-DAREK vs. DUE, SNGP, GP, and Ensemble-KAN on 10·cos(x), each with its own uncertainty band and representative points](imgs/hero_comparison.png)
+*K-DAREK vs. baselines, each with its own uncertainty band.*
+
+![Four knot-selection strategies training side by side on 10·cos(x)](imgs/knot_placement.gif)
+*Knot-selection strategies compared during training.*
+
 | ![Multi agent simulation when GP model fails.](imgs/overlayed_gifsanim_GP2.gif) | ![Multi agent simulation when DAREK model reach goal.](imgs/overlayed_gifsanim_DAREK2.gif) |
 |:--:|:--:|
 | Multi agent simulation when GP model fails. | Multi agent simulation when DAREK model reaches goal. |
