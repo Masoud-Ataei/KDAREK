@@ -7,7 +7,7 @@ This is the GitHub repository for the paper [“K-DAREK: Distance-Aware Errors f
 The supplementary material for “Worst-Case Distance-Aware Error
 Bounds for Neural Networks” is available here:
 
-[Download supplementary material](https://github.com/Masoud-Ataei/KDAREK/releases/download/ojcsys-r1/KDAREK_Supp.pdf)
+[Download supplementary material](https://github.com/Masoud-Ataei/KDAREK/releases/download/ojcsys-r1/KDAREK_OJCSYS_Supplementary.pdf)
 
 KDAREK is a method to compute **tight**, **distance-aware**, and **worst-case error bounds** for Kurkova - Kolmogorov-Arnold Networks (KKANs). Unlike probabilistic uncertainty estimation, KDAREK uses Lipschitz continuity of true functions to derive analytical bounds that increase with distance from training data. Please find the paper and other information here [here](https://Masoud-Ataei.github.io/KDAREK/index.html).
 
